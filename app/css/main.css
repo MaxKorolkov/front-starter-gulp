@@ -1,0 +1,9 @@
+body {
+  background: #fff;
+  font-family: sans-serif; }
+
+.flex-test {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
