@@ -9,29 +9,33 @@ var gulp = require('gulp'),
   imagemin = require('gulp-imagemin'), // Подключаем библиотеку для работы с изображениями
   pngquant = require('imagemin-pngquant'), // Подключаем библиотеку для работы с png
   cache = require('gulp-cache'), // Подключаем библиотеку кеширования
-  autoprefixer = require('gulp-autoprefixer');// Подключаем библиотеку для автоматического добавления префиксов
+  autoprefixer = require('gulp-autoprefixer'),// Подключаем библиотеку для автоматического добавления префиксов
+  wait = require('gulp-wait2');// для задержки перев broweserReload
 
 gulp.task('sass', function () { // Создаем таск "sass"
   return gulp.src('app/sass/**/*.scss') // Берем источник
+    .pipe(wait(1500))
     .pipe(sass()) // Преобразуем Sass в CSS посредством gulp-sass
-    .pipe(autoprefixer(['last 15 versions', '> 1%', 'ie 8', 'ie 7'], { cascade: true })) // Создаем префиксыs
+    .pipe(autoprefixer(['last 15 versions', '> 0.1%', 'ie 8'], { cascade: true })) // Создаем префиксы
     .pipe(gulp.dest('app/css')) // Выгружаем результата в папку app/css
     .pipe(browserSync.reload({stream: true})) // Обновляем CSS на странице при изменении
 });
 
 gulp.task('css-libs', ['sass'], function () {
-  return gulp.src('app/css/libs.css') // Выбираем файл для минификации
-    .pipe(cssnano()) // Сжимаем
-    .pipe(rename({suffix: '.min'})) // Добавляем суффикс .min
+  return gulp.src([ // Прописываем пути файлов до css файлов библиотек в node_modules
+    ''
+  ]) // Выбираем файл для минификации
+    .pipe(concat('libs.min.css'))
+    .pipe(cssnano()) // Сжимаем`
     .pipe(gulp.dest('app/css')); // Выгружаем в папку app/css
 });
 
+
 gulp.task('scripts', function () {
-  return gulp.src([ // Берем все необходимые библиотеки
-    'node_modules/jquery/dist/jquery.min.js', // Берем jQuery
-    'node_modules/magnific-popup/dist/jquery.magnific-popup.min.js' // Берем Magnific Popup
+  return gulp.src([ // Прописываем пути файлов до css файлов библиотек в node_modules
+    ''
   ])
-    .pipe(concat('libs.min.js')) // Собираем их в кучу в новом файле libs.min.js
+    .pipe(concat('libs.min.js')) // Собираем их в новом файле libs.min.js
     .pipe(uglify()) // Сжимаем JS файл
     .pipe(gulp.dest('app/js')); // Выгружаем в папку app/js
 });
@@ -70,10 +74,7 @@ gulp.task('clean', function () {
 
 gulp.task('build', ['clean', 'img', 'sass', 'scripts'], function () {
 
-  var buildCss = gulp.src([ // Переносим CSS стили в продакшен
-    'app/css/main.css',
-    'app/css/libs.min.css'
-  ])
+  var buildCss = gulp.src('app/css/**/*') // Переносим CSS стили в продакшен
     .pipe(gulp.dest('dist/css'));
 
   var buildFonts = gulp.src('app/fonts/**/*') // Переносим шрифты в продакшен
