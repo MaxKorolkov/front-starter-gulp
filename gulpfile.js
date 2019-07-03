@@ -7,23 +7,24 @@ var gulp = require('gulp'),
   rename = require('gulp-rename'), // Подключаем библиотеку для переименования файлов
   del = require('del'), // Подключаем библиотеку для удаления файлов и папок
   imagemin = require('gulp-imagemin'), // Подключаем библиотеку для работы с изображениями
-  pngquant = require('imagemin-pngquant'), // Подключаем библиотеку для работы с png
   cache = require('gulp-cache'), // Подключаем библиотеку кеширования
   autoprefixer = require('gulp-autoprefixer'),// Подключаем библиотеку для автоматического добавления префиксов
   wait = require('gulp-wait2');// для задержки перев broweserReload
+  plumber = require('gulp-plumber');
 
 gulp.task('sass', function () { // Создаем таск "sass"
   return gulp.src('app/sass/**/*.scss') // Берем источник
-    .pipe(wait(1500))
-    .pipe(sass()) // Преобразуем Sass в CSS посредством gulp-sass
+    .pipe(plumber())
+    .pipe(sass().on('error', sass.logError)) // Преобразуем Sass в CSS посредством gulp-sass
     .pipe(autoprefixer(['last 15 versions', '> 0.1%', 'ie 8'], { cascade: true })) // Создаем префиксы
+    .pipe(plumber.stop())
     .pipe(gulp.dest('app/css')) // Выгружаем результата в папку app/css
     .pipe(browserSync.reload({stream: true})) // Обновляем CSS на странице при изменении
 });
 
 gulp.task('css-libs', ['sass'], function () {
   return gulp.src([ // Прописываем пути файлов до css файлов библиотек в node_modules
-    ''
+    'node_modules/normalize.css/normalize.css'
   ]) // Выбираем файл для минификации
     .pipe(concat('libs.min.css'))
     .pipe(cssnano()) // Сжимаем`
@@ -62,7 +63,6 @@ gulp.task('img', function () {
       interlaced: true,
       progressive: true,
       svgoPlugins: [{removeViewBox: false}],
-      use: [pngquant()]
     })))
     .pipe(gulp.dest('dist/img')); // Выгружаем на продакшен
 });
